@@ -54,7 +54,7 @@ object DataFrameCode {
 
   }
 
-  def simple_cube(spark: SparkSession) = {
+  def simple_cube(spark: SparkSession): Unit = {
     val sales1Df: DataFrame = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path)
     val sales2Df: DataFrame = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_2_path)
     val unionDf = sales1Df.union(sales2Df)
@@ -66,7 +66,7 @@ object DataFrameCode {
     cubedDf.orderBy("product_name").show()
   }
 
-  def joined_write(spark: SparkSession) = {
+  def joined_write(spark: SparkSession): Unit = {
     val sales1Df: DataFrame = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path)
     val sales2Df: DataFrame = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_2_path)
     val unionDf = sales1Df.union(sales2Df)

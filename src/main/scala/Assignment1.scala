@@ -9,25 +9,26 @@ object Assignment1 {
   val dw_dir = "file:///G:\\Ashok\\TRAININGS\\JIGSAW\\ASSIGNMENTS\\1st Assignment\\INPUTS\\dataset"
   val superstore_Returns_path = dw_dir + "\\Global Superstore Sales - Global Superstore Returns.csv"
   val superstore_Sales_path = dw_dir + "\\Global Superstore Sales - Global Superstore Sales.csv"
-def main(args: Array[String]) = {
-  val winutilPath = "G:\\Ashok\\TRAININGS\\JIGSAW\\PACKAGES\\winutils"
 
-  if (System.getProperty("os.name").toLowerCase.contains("win")) {
-    System.out.println("Detected windows")
-    System.setProperty("hadoop.home.dir", winutilPath)
-    System.setProperty("HADOOP_HOME", winutilPath)
+  def main(args: Array[String]): Unit = {
+    val winutilPath = "G:\\Ashok\\TRAININGS\\JIGSAW\\PACKAGES\\winutils"
+
+    if (System.getProperty("os.name").toLowerCase.contains("win")) {
+      System.out.println("Detected windows")
+      System.setProperty("hadoop.home.dir", winutilPath)
+      System.setProperty("HADOOP_HOME", winutilPath)
+    }
+
+    val spark = SparkSession.builder
+      .appName("Simple Application")
+      .master("local[*]")
+      .getOrCreate()
+
+
+    windows_agg(spark)
   }
 
-  val spark = SparkSession.builder
-    .appName("Simple Application")
-    .master("local[*]")
-    .getOrCreate()
-
-
-  windows_agg(spark)
-}
-
-  def windows_agg(spark: SparkSession) = {
+  def windows_agg(spark: SparkSession): Unit = {
     val superstore_ReturnsDf = spark.read.option("header", "true").option("inferSchema", "true").csv(superstore_Returns_path)
     val superstore_SalesDf = spark.read.option("header", "true").option("inferSchema", "true").csv(superstore_Sales_path)
     //superstore_ReturnsDf.show()
@@ -39,7 +40,7 @@ def main(args: Array[String]) = {
     //val cubedDf = joinedDf.cube("Profit", "Quantity").sum()
     //cubedDf.orderBy("Country").show()
 
-  /*
+    /*
     val rankSpec: WindowSpec = Window.partitionBy("date_of_sale").
       orderBy(functions.col("total_amount").desc)
     val rankSpecDf: Dataset[Row] = superstore_ReturnsDf
