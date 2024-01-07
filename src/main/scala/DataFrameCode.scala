@@ -76,6 +76,8 @@ object DataFrameCode {
     joinedDf.write.mode("overwrite")
       .option("header", "true")
       .csv("file:///C:/Training/TVS/dw/output_csv/joined_csv")
+
+    //joinedDf.write.format("csv").option("path", "C:/Training/TVS/dw/output_csv/joined_csv")
   }
 
   }

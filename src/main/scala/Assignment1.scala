@@ -30,8 +30,14 @@ def main(args: Array[String]) = {
   def windows_agg(spark: SparkSession) = {
     val superstore_ReturnsDf = spark.read.option("header", "true").option("inferSchema", "true").csv(superstore_Returns_path)
     val superstore_SalesDf = spark.read.option("header", "true").option("inferSchema", "true").csv(superstore_Sales_path)
-    superstore_ReturnsDf.show()
-    superstore_SalesDf.show()
+    //superstore_ReturnsDf.show()
+    //superstore_SalesDf.show()
+
+    val joinedDf = superstore_ReturnsDf.join(superstore_SalesDf, "Order ID")
+
+    joinedDf.show()
+    //val cubedDf = joinedDf.cube("Profit", "Quantity").sum()
+    //cubedDf.orderBy("Country").show()
 
   /*
     val rankSpec: WindowSpec = Window.partitionBy("date_of_sale").
