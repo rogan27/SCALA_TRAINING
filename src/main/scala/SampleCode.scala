@@ -5,7 +5,7 @@ import org.apache.spark.sql.functions._
 
 object SampleCode {
   def main(args: Array[String]) = {
-    val wintilpath = "file:///G:\\Ashok\\TRAININGS\\JIGSAW\\PACKAGES\\winutils"
+    val wintilpath = "G:\\Ashok\\TRAININGS\\JIGSAW\\PACKAGES\\winutils"
     val dw_dir = "file:///G:\\Ashok\\TRAININGS\\JIGSAW\\TEST_FILES\\dw_dataset"
     val sales_1_path = dw_dir+"\\sales_1.csv"
     val sales_2_path = dw_dir+"\\sales_2.csv"

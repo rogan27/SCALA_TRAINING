@@ -1,8 +1,11 @@
 package com.bdec.training.sparkscala
 
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions}
 
+import java.sql.Date
+
+case class Sales (item_id: Int,item_qty: Int,unit_price: Int,total_amount: Int,abc:Int, date_of_sale: Date)
 object DevaRefCode {
   val dw_dir = "file:///G:\\Ashok\\TRAININGS\\JIGSAW\\TEST_FILES\\dw_dataset"
   val sales_1_path = dw_dir + "\\sales_1.csv"
@@ -10,7 +13,7 @@ object DevaRefCode {
   val product_path = dw_dir + "\\product_meta.csv"
 
   def main(args: Array[String]) = {
-    val winutilPath = "C:\\softwares\\winutils" //\\bin\\winutils.exe"; //bin\\winutils.exe";
+    val winutilPath = "G:\\Ashok\\TRAININGS\\JIGSAW\\PACKAGES\\winutils"
 
     if (System.getProperty("os.name").toLowerCase.contains("win")) {
       System.out.println("Detected windows")
@@ -23,8 +26,63 @@ object DevaRefCode {
       .master("local[*]")
       .getOrCreate()
 
-    complex_join(spark)
+    //complex_join(spark)
 
+    //dataset_version(spark)
+
+    //windows_agg(spark)
+
+    sql_version(spark)
+
+  }
+
+  def sql_version(spark: SparkSession) = {
+    val sales1Df = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path)
+    sales1Df.createOrReplaceTempView("sales_table")
+    val prodDf = spark.read.option("header", "true").option("inferSchema", "true").csv(product_path)
+    prodDf.createOrReplaceTempView("prod_table")
+    spark.sql("select * from prod_table pt left anti join sales_table st on pt.item_id = st.item_id").show()
+  }
+  def windows_agg(spark: SparkSession) = {
+    val sales1Df = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path)
+
+    val rankSpec : WindowSpec = Window.partitionBy("date_of_sale").
+      orderBy(functions.col("total_amount").desc)
+    val simpleSpec : WindowSpec = Window.partitionBy().orderBy("item_id")
+    val simpleSpecDf : Dataset[Row] = sales1Df.withColumn("row_number",functions.row_number.over(simpleSpec))
+    val rankSpecDf : Dataset[Row] = sales1Df
+      .withColumn("date_wise_rank",functions.dense_rank.over(rankSpec))
+      .where("date_wise_rank = 1")
+
+
+
+
+    simpleSpecDf.show()
+
+
+  }
+  def dataset_version(spark: SparkSession) = {
+    import spark.implicits._
+    val sales1Df = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path).as[Sales]
+    val sales2Df = spark.read.option("header", "true").option("inferSchema", "true").csv(sales_1_path)
+    val salesDs: Dataset[Sales] = sales1Df.as[Sales]
+    val finalDs = salesDs.filter(x=> x.unit_price > 10)
+     // .withColumn("abc", lit("80"))
+     // .withColumn("total", salesDs.col("abc") * salesDs.col("unit_price"))
+
+    val newFinalDs = finalDs.filter("total_amount > 100")
+
+    val collectedSales2: Array[Row] = sales2Df.collect()
+    val row_2_1: Row = collectedSales2(0)
+    val row_2_1_item_id = row_2_1.getInt(0)
+    val row_2_1_item_qty= row_2_1.getInt(1)
+
+
+    val collectedSales1: Array[Sales] = salesDs.collect()
+    val row1: Sales = collectedSales1(0)
+    val item_id = row1.item_id
+
+    finalDs.show()
   }
 
   def complex_join(spark: SparkSession) = {
